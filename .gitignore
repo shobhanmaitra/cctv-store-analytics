@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.env
+.venv/
+venv/
+clips/*.mp4
+# Local generated artifacts
+data/store_intel.db
+data/generated_events.jsonl
+pipeline_run.log
+pipeline_run_stride5.log
+
+*.mp4

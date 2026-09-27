@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Store Intelligence</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #ffffff;
+            color: #2b2b2b;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 1280px; margin: 0 auto; padding: 24px 16px 60px; }
+        header { text-align: center; margin-bottom: 24px; }
+        h1 {
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 900;
+            margin-bottom: 6px;
+            color: #a52ca4;
+            letter-spacing: -0.02em;
+        }
+        .subtitle { color: #666666; font-size: 1rem; margin-bottom: 20px; font-weight: 600; }
+
+        /* Store Switcher */
+        .store-switcher {
+            display: flex; justify-content: center; gap: 12px; margin-bottom: 20px;
+        }
+        .store-btn {
+            padding: 12px 28px;
+            border-radius: 999px;
+            border: 2px solid #eec4ee;
+            background: #ffffff;
+            color: #a52ca4;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(165, 44, 164, 0.08);
+        }
+        .store-btn:hover { border-color: #a52ca4; background: #fdf5fd; transform: translateY(-1px); }
+        .store-btn.active {
+            background: linear-gradient(135deg, #a52ca4, #8c2ea8);
+            border-color: transparent;
+            color: #ffffff;
+            box-shadow: 0 6px 16px rgba(165, 44, 164, 0.25);
+        }
+
+        .topbar { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 10px; }
+        .pill {
+            padding: 8px 16px;
+            background: #ffffff;
+            color: #555555;
+            border-radius: 999px;
+            border: 1px solid #e0e0e0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .pill b { color: #a52ca4; font-weight: 800; }
+
+        .layout { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 20px; align-items: start; margin-top: 20px; }
+        @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+        .card {
+            background: #ffffff;
+            border: 1px solid #eeeeee;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(165, 44, 164, 0.12);
+            border-color: #f4dcf4;
+        }
+        .card-title {
+            color: #777777; letter-spacing: 0.05em; text-transform: uppercase;
+            font-size: 0.75rem; font-weight: 700; margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+        }
+        .card-value {
+            font-size: clamp(2rem, 3.5vw, 2.5rem); font-weight: 900;
+            color: #a52ca4; line-height: 1;
+        }
+        .card-caption { margin-top: 8px; color: #888888; font-size: 0.9rem; font-weight: 600; }
+
+        .section { margin-top: 20px; }
+        .panelTitle { font-size: 1.1rem; font-weight: 800; color: #333333; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.02em; }
+
+        .zone-list { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        @media (max-width: 720px) { .zone-list { grid-template-columns: 1fr; } }
+
+        .zone-item {
+            background: #fafafa;
+            border: 1px solid #eaeaea;
+            border-radius: 14px; padding: 14px;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .zone-item:hover { border-color: #eec4ee; background: #fffdfd; }
+        .zone-item strong { color: #444444; font-size: 0.95rem; font-weight: 700; }
+
+        .small { color: #888888; font-size: 0.85rem; font-weight: 600; }
+
+        .bar {
+            height: 8px; border-radius: 999px;
+            background: #f0f0f0;
+            overflow: hidden; margin-top: 10px;
+        }
+        .bar > i {
+            display: block; height: 100%; width: 0%;
+            background: linear-gradient(90deg, #d373d1, #a52ca4);
+            border-radius: 999px; transition: width .5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sideStack { display: grid; gap: 20px; }
+
+        .fStage {
+            padding: 14px; border-radius: 12px;
+            background: #fafafa; border: 1px solid #eaeaea;
+            margin-bottom: 12px; transition: transform 0.2s;
+        }
+        .fStage:hover { transform: translateX(4px); border-color: #eec4ee; }
+        .fHead { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px; align-items: center; }
+        .fHead b { color: #333333; font-weight: 800; font-size: 0.95rem; }
+        .fHead span { color: #a52ca4; font-family: 'Inter', monospace; font-size: .9rem; font-weight: 700; }
+
+        .endpoint {
+            color: #555555; background: #fdf5fd;
+            border-radius: 10px; padding: 12px 14px;
+            font-family: ui-monospace, monospace; font-size: 0.85rem;
+            border: 1px solid #f6d8f6; margin-top: 10px;
+            font-weight: 600;
+        }
+        .endpoint a { color: #a52ca4; text-decoration: none; }
+        .endpoint a:hover { text-decoration: underline; color: #8c2ea8; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card, .zone-item, .fStage { animation: slideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Store Intelligence</h1>
+            <p class="subtitle">Live Traffic, Conversion, Queue Health, and Heatmaps</p>
+            <div class="store-switcher">
+                <button class="store-btn active" data-store="ST1008" onclick="switchStore('ST1008')">🏪 Brigade Road (Store 1)</button>
+                <button class="store-btn" data-store="ST1076" onclick="switchStore('ST1076')">🏪 Mumbai (Store 2)</button>
+            </div>
+            <div class="topbar">
+                <span class="pill">Store: <b id="storeLabel">ST1008</b></span>
+                <span class="pill">Refresh: 3s</span>
+                <span class="pill">Last update: <b id="lastUpdate">—</b></span>
+                <span class="pill">Feed: <b id="feedStatus">—</b></span>
+            </div>
+        </header>
+
+        <div class="layout">
+            <div>
+                <div class="grid" id="metrics">
+                    <div class="card"><div class="card-title"><span>Unique visitors</span><span class="small">Sessions</span></div><div class="card-value" id="visitors">—</div><div class="card-caption">Distinct customer sessions</div></div>
+                    <div class="card"><div class="card-title"><span>Conversion rate</span><span class="small">Billing</span></div><div class="card-value" id="conversion">—</div><div class="card-caption">Checkout reach</div></div>
+                    <div class="card"><div class="card-title"><span>Queue depth</span><span class="small">Live</span></div><div class="card-value" id="queue">—</div><div class="card-caption">Current billing queue</div></div>
+                    <div class="card"><div class="card-title"><span>Abandonment</span><span class="small">Drop-off</span></div><div class="card-value" id="abandonment">—</div><div class="card-caption">Queue drop-off rate</div></div>
+                    <div class="card"><div class="card-title"><span>Staff filtered</span><span class="small">Excluded</span></div><div class="card-value" id="staff">—</div><div class="card-caption">Filtered staff events</div></div>
+                </div>
+
+                <section class="section card">
+                    <div class="panelTitle">Customer Funnel</div>
+                    <div id="funnel"></div>
+                </section>
+
+                <section class="section card">
+                    <div class="panelTitle">Zone Dwell Times</div>
+                    <div id="zones" class="zone-list"><div class="zone-item small">Loading zone metrics…</div></div>
+                </section>
+            </div>
+
+            <div class="sideStack">
+                <section class="card">
+                    <div class="panelTitle">Heatmap Insights</div>
+                    <div id="heatmapTiles" class="zone-list" style="grid-template-columns: 1fr 1fr;"></div>
+                </section>
+
+                <section class="card">
+                    <div class="panelTitle">API Reference</div>
+                    <div id="apiLinks"></div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let storeId = 'ST1008';
+        let ws = null;
+        let fetchGen = 0; // generation counter to discard stale fetches
+        let funnelTimer = null;
+        let heatmapTimer = null;
+        let feedTimer = null;
+
+        function switchStore(id) {
+            storeId = id;
+            fetchGen++; // invalidate all in-flight fetches
+            document.getElementById('storeLabel').textContent = id;
+            document.querySelectorAll('.store-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.store === id);
+            });
+            if (ws) {
+                ws.onclose = null;
+                try { ws.close(); } catch(e) {}
+            }
+            // Clear and restart intervals so they use the new storeId
+            clearInterval(funnelTimer);
+            clearInterval(heatmapTimer);
+            clearInterval(feedTimer);
+            refreshAll();
+            connectWS(id);
+            updateApiLinks();
+            funnelTimer = setInterval(updateFunnel, 5000);
+            heatmapTimer = setInterval(updateHeatmapTiles, 7000);
+            feedTimer = setInterval(updateFeedStatus, 12000);
+        }
+
+        function updateApiLinks() {
+            document.getElementById('apiLinks').innerHTML = [
+                `/stores/${storeId}/metrics`, `/stores/${storeId}/funnel`,
+                `/stores/${storeId}/heatmap`,
+                `/health`, `/docs`
+            ].map(u => `<div class="endpoint"><a href="${u}">${u}</a></div>`).join('');
+        }
+
+        function setLastUpdate() {
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+        }
+
+        function renderMetrics(data) {
+            document.getElementById('visitors').textContent = data.unique_visitors;
+            document.getElementById('conversion').innerHTML = (data.conversion_rate * 100).toFixed(1) + '%';
+            document.getElementById('queue').textContent = data.current_queue_depth;
+            document.getElementById('abandonment').innerHTML = (data.abandonment_rate * 100).toFixed(1) + '%';
+            document.getElementById('staff').textContent = data.staff_events_excluded ?? 0;
+
+            const zones = data.avg_dwell_by_zone || [];
+            if (!zones.length) {
+                document.getElementById('zones').innerHTML = '<div class="zone-item small">No zone data available</div>';
+                return;
+            }
+            document.getElementById('zones').innerHTML = zones.map(zone => {
+                const w = Math.min(100, Math.round((zone.avg_dwell_ms || 0) / 5000 * 100));
+                return `
+                    <div class="zone-item">
+                        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;">
+                            <strong>${zone.zone_id}</strong>
+                            <span class="small">${zone.visit_count} visits</span>
+                        </div>
+                        <div class="small" style="margin-top:6px;">Avg dwell: ${((zone.avg_dwell_ms||0)/1000).toFixed(1)}s</div>
+                        <div class="bar"><i style="width:${w}%"></i></div>
+                    </div>
+                `;
+            }).join('');
+            setLastUpdate();
+        }
+
+        function connectWS(id) {
+            const wsUrl = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + `/ws/metrics/${id}`;
+            ws = new WebSocket(wsUrl);
+            ws.onmessage = (event) => {
+                if (id !== storeId) return;
+                try { renderMetrics(JSON.parse(event.data)); } catch (e) {}
+            };
+            ws.onclose = () => {
+                if (id === storeId) {
+                    setTimeout(() => connectWS(id), 2000);
+                }
+            };
+            ws.onerror = () => { try { ws.close(); } catch(e) {} };
+        }
+
+        function updateFunnel() {
+            const gen = fetchGen;
+            const sid = storeId;
+            fetch(`/stores/${sid}/funnel`).then(r => r.json()).then(body => {
+                if (gen !== fetchGen) return; // stale response, discard
+                const stages = body.stages || [];
+                const max = Math.max(...stages.map(s => s.count || 0), 1);
+                document.getElementById('funnel').innerHTML = stages.map(s => {
+                    const pct = Math.round(((s.count||0)/max)*100);
+                    const drop = (s.drop_off_pct === null || s.drop_off_pct === undefined) ? '' : (Number(s.drop_off_pct).toFixed(1) + '% drop');
+                    return `<div class="fStage"><div class="fHead"><b>${s.stage}</b><span>${s.count} ${drop}</span></div><div class="bar"><i style="width:${pct}%"></i></div></div>`;
+                }).join('');
+            }).catch(() => {});
+        }
+
+        function updateHeatmapTiles() {
+            const gen = fetchGen;
+            const sid = storeId;
+            fetch(`/stores/${sid}/heatmap`).then(r => r.json()).then(body => {
+                if (gen !== fetchGen) return; // stale response, discard
+                const cells = body.cells || [];
+                const maxV = Math.max(...cells.map(c => c.visit_frequency || 0), 1);
+                const top = cells.slice().sort((a,b) => (b.visit_frequency||0) - (a.visit_frequency||0)).slice(0, 6);
+                if (!top.length) { document.getElementById('heatmapTiles').innerHTML = `<div class="zone-item small">No heatmap data</div>`; return; }
+                document.getElementById('heatmapTiles').innerHTML = top.map(c => {
+                    const vPct = Math.round(((c.visit_frequency||0)/maxV)*100);
+                    return `<div class="zone-item"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;"><strong>${c.zone_id}</strong><span class="small">${(c.visit_frequency||0).toFixed(1)}</span></div><div class="bar"><i style="width:${vPct}%"></i></div></div>`;
+                }).join('');
+            }).catch(() => {});
+        }
+
+        function updateFeedStatus() {
+            const gen = fetchGen;
+            fetch('/health').then(r => r.json()).then(h => {
+                if (gen !== fetchGen) return; // stale response, discard
+                const warnings = (h.warnings || []).filter(w => (w || '').includes(storeId));
+                document.getElementById('feedStatus').textContent = warnings.length ? warnings[0] : 'OK';
+            }).catch(() => {});
+        }
+
+        function refreshAll() {
+            const gen = fetchGen;
+            const sid = storeId;
+            fetch(`/stores/${sid}/metrics`).then(r => r.json()).then(data => {
+                if (gen !== fetchGen) return;
+                renderMetrics(data);
+            }).catch(() => {});
+            updateFunnel(); updateHeatmapTiles(); updateFeedStatus();
+        }
+
+        // Boot
+        updateApiLinks();
+        refreshAll();
+        connectWS(storeId);
+        funnelTimer = setInterval(updateFunnel, 5000);
+        heatmapTimer = setInterval(updateHeatmapTiles, 7000);
+        feedTimer = setInterval(updateFeedStatus, 12000);
+    </script>
+</body>
+</html>
